@@ -1,20 +1,59 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { ThemeProvider } from "./src/context/ThemeContext";
+import { useFonts } from 'expo-font';
 
-export default function App() {
+import SplashScreen from "./src/screens/SplashScreen";
+import SignInScreen from "./src/screens/SignInScreen";
+import SignUpScreen from "./src/screens/SignUpScreen";
+// import HomeScreen from "./src/screens/HomeScreen";
+
+export type RootStackParamList = {
+  Splash: undefined;
+  SignIn: undefined;
+  SignUp: undefined;
+  // Home: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
+
+const AppContent = () => {
+
+  // 4. Carregamos as fontes AQUI
+  const [fontsLoaded] = useFonts({
+    'Atkinson-Regular': require('./assets/fonts/Atkinson-Hyperlegible-Regular.ttf'),
+    'Atkinson-Bold': require('./assets/fonts/Atkinson-Hyperlegible-Bold.ttf'),
+    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
+    'Inter-Medium': require('./assets/fonts/Inter-Medium.ttf'),
+    'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
+    'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
+  });
+
+  if (!fontsLoaded) {
+    return <SplashScreen />; 
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="SignIn"
+        screenOptions={{
+          headerShown: false
+        }}>
+        {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
+        <Stack.Screen name="SignIn" component={SignInScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
