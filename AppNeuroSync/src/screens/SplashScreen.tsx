@@ -13,8 +13,8 @@ const SplashScreen: React.FC = () => {
   const styles = getStyles(currentColors);
 
   const [fontsLoaded] = useFonts({
-    'Atkinson-Regular': require('../../assets/fonts/Atkinson-Hyperlegible-Regular.ttf'),
-    'Atkinson-Bold': require('../../assets/fonts/Atkinson-Hyperlegible-Bold.ttf'),
+    'Atkinson-Regular': require('../../assets/fonts/AtkinsonHyperlegible-Regular.ttf'),
+    'Atkinson-Bold': require('../../assets/fonts/AtkinsonHyperlegible-Bold.ttf'),
     'Inter-Regular': require('../../assets/fonts/Inter-Regular.ttf'),
     'Inter-Medium': require('../../assets/fonts/Inter-Medium.ttf'),
     'Inter-SemiBold': require('../../assets/fonts/Inter-SemiBold.ttf'),

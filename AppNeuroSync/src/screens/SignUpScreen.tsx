@@ -44,7 +44,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             Alert.alert('Senhas não conferem', 'As senhas digitadas são diferentes.');
             return;
         }
-        
+
         console.log('Cadastro simulado com:', nome, email);
         // Navega para Home (assumindo auto-login)
         // navigation.navigate('Home'); 
@@ -62,7 +62,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
         >
-            <StatusBar 
+            <StatusBar
                 barStyle={theme === 'light' ? 'dark-content' : 'light-content'}
                 backgroundColor={currentColors.background}
             />
@@ -120,12 +120,12 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
                     <TouchableOpacity style={styles.button} onPress={handleRegister}>
                         <Text style={styles.buttonText}>Cadastrar</Text>
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity
                         style={styles.linkButton}
                         onPress={handleNavigateToLogin}
                     >
-                        <Text style={styles.linkText}>Já tem uma conta? Faça login</Text>
+                        <Text style={styles.linkText}>Já tem uma conta? Faça o login aqui</Text>
                     </TouchableOpacity>
 
                 </View>
@@ -165,10 +165,9 @@ const getStyles = (currentColors: ThemeColors) => StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontWeight: 'bold',
         color: currentColors.text,
         marginBottom: 40,
-        fontFamily: 'Inter-SemiBold',
+        fontFamily: 'Atkinson-Bold',
     },
     input: {
         width: '85%',

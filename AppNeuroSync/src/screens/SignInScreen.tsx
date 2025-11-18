@@ -37,8 +37,8 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
             Alert.alert('Campos vazios', 'Por favor, preencha o email e a senha.');
             return;
         }
-        console.log('Login simulado com:', email);
-        // navigation.navigate('Home'); 
+        // console.log('Login simulado com:', email);
+        navigation.navigate('Home'); 
     };
 
     const handleNavigateToRegister = () => {
@@ -100,7 +100,7 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
                         style={styles.linkButton}
                         onPress={handleNavigateToRegister}
                     >
-                        <Text style={styles.linkText}>Não tem uma conta? Cadastre-se</Text>
+                        <Text style={styles.linkText}>Não tem uma conta? Cadastre-se aqui</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -140,10 +140,9 @@ const getStyles = (currentColors: ThemeColors) => StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontWeight: 'bold',
         color: currentColors.text,
         marginBottom: 40,
-        fontFamily: 'Inter-SemiBold', 
+        fontFamily: 'Atkinson-Bold',
     },
     input: {
         width: '85%',
