@@ -7,20 +7,19 @@ import {
     StyleSheet,
     StatusBar,
     Alert,
-    Modal,
-    TouchableWithoutFeedback
+    Modal, // Importado
+    TouchableWithoutFeedback, // Importado
+    Platform // Importado para lógica de data
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { MainTabParamList, RootStackParamList } from '../../App';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
-
-// Biblioteca externa para data deve ser instalada (simulada aqui)
-// const DateTimePicker = require('@react-native-community/datetimepicker').default;
 
 // --- MOCK DE DADOS DE RESERVAS ---
 const initialReservations = [
@@ -29,6 +28,8 @@ const initialReservations = [
     { id: '3', roomName: 'Cabine Silêncio 3', date: '15 Nov, 2025', time: '10:00 - 10:30', status: 'completed' },
     { id: '4', roomName: 'Sala Terapia C', date: '19 Nov, 2025', time: '16:00 - 17:00', status: 'cancelled' },
 ];
+
+type Reservation = typeof initialReservations[0];
 
 type ReservationsScreenNavigationProp = CompositeNavigationProp<
     BottomTabNavigationProp<MainTabParamList, 'Reservations'>,
@@ -51,48 +52,122 @@ const getStatusStyle = (status: string, currentColors: ThemeColors) => {
 const ReservationsScreen = () => {
     const navigation = useNavigation<ReservationsScreenNavigationProp>();
     
-    // --- ESTADOS DE FILTRO ---
-    const [reservations, setReservations] = useState(initialReservations);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [isFiltering, setIsFiltering] = useState(false); // Para mudar o ícone de filtro
-
     const { theme } = useTheme();
     const currentColors = colors[theme];
-    const styles = getStyles(currentColors, theme, isFiltering);
+    const styles = getStyles(currentColors, theme, false); // isFiltering false por padrão
 
-    // --- FUNÇÕES DE FILTRAGEM ---
+    // --- Estados principais ---
+    const [reservations, setReservations] = useState(initialReservations);
 
-    const applyDateFilter = () => {
-        // Formato da string no mock: "19 Nov, 2025"
-        const targetDay = selectedDate.getDate();
-        const targetMonth = selectedDate.toLocaleDateString('en-US', { month: 'short' });
-        const targetYear = selectedDate.getFullYear();
+    // --- Estados de filtro ---
+    const [filterModalVisible, setFilterModalVisible] = useState(false);
+    const [filterDate, setFilterDate] = useState<Date>(new Date());
+    const [isFiltering, setIsFiltering] = useState(false);
+
+    // --- Estados de edição ---
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
+    
+    // --- Estados temporários para edição ---
+    const [editDate, setEditDate] = useState<Date>(new Date());
+    const [editTimeStart, setEditTimeStart] = useState("09:00");
+    
+    // --- Estados para o DatePicker nativo ---
+    const [showPicker, setShowPicker] = useState(false);
+    const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
+    // Define quem está chamando o picker: 'filter' ou 'edit'
+    const [pickerContext, setPickerContext] = useState<'filter' | 'edit'>('filter'); 
+
+
+    // --- LÓGICA DE DATE PICKER NATIVO ---
+    const showDatePicker = (mode: 'date' | 'time', context: 'filter' | 'edit') => {
+        setPickerMode(mode);
+        setPickerContext(context);
+        setShowPicker(true);
+    };
+
+    const onDateChange = (event: any, selectedDate?: Date) => {
+        if (Platform.OS === 'android') setShowPicker(false);
+
+        if (event.type === 'set' && selectedDate) {
+            if (pickerContext === 'filter') {
+                setFilterDate(selectedDate);
+            } else {
+                // Contexto de Edição
+                if (pickerMode === 'date') {
+                    setEditDate(selectedDate);
+                } else {
+                    // Se for horário, atualiza a string de hora
+                    const timeStr = selectedDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    setEditTimeStart(timeStr);
+                }
+            }
+        }
+    };
+
+    // Funções de filtro
+    const applyFilter = () => {
+        const targetString = filterDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        // Ex: "19 Nov, 2025" (formato do mock) - Ajuste conforme seu locale real
+        // Para simplificar o mock, vamos usar uma comparação básica de string
+        // Na vida real, usaria objetos Date reais nas reservas
         
-        // Exemplo de string de alvo: "19 Nov, 2025"
-        const targetString = `${targetDay} ${targetMonth}, ${targetYear}`;
-        
-        const filtered = initialReservations.filter(res => 
-            res.date.includes(targetString)
-        );
+        // Mock de formatação para bater com "19 Nov, 2025"
+        const day = filterDate.getDate();
+        const month = filterDate.toLocaleDateString('en-US', { month: 'short' });
+        const year = filterDate.getFullYear();
+        const searchStr = `${day} ${month}, ${year}`;
 
+        const filtered = initialReservations.filter(res => res.date === searchStr);
         setReservations(filtered);
         setIsFiltering(true);
-        setModalVisible(false);
+        setFilterModalVisible(false);
     };
 
-    const clearDateFilter = () => {
-        setSelectedDate(new Date());
+    const clearFilter = () => {
         setReservations(initialReservations);
         setIsFiltering(false);
-        setModalVisible(false);
+        setFilterModalVisible(false);
     };
-    
-    // Lógica de Cancelamento (Delete do CRUD)
+
+    // Funções de edição
+    const handleOpenEdit = (reservation: Reservation) => {
+        setEditingReservation(reservation);
+        // Parser simples da data string para objeto Date (Mock)
+        // Na vida real: new Date(reservation.dateISO)
+        setEditDate(new Date()); 
+        setEditTimeStart(reservation.time.split(' - ')[0]); // Pega o horário inicial
+        setEditModalVisible(true);
+    };
+
+    const handleSaveEdit = () => {
+        if (!editingReservation) return;
+
+        // Formata a nova data para string (padrão do mock)
+        const day = editDate.getDate();
+        const month = editDate.toLocaleDateString('en-US', { month: 'short' });
+        const year = editDate.getFullYear();
+        const newDateStr = `${day} ${month}, ${year}`;
+        
+        // Cria novo horário (mantendo duração de 1h fixa para o mock)
+        const newTimeStr = `${editTimeStart} - ...`; 
+
+        setReservations(prev => prev.map(res => 
+            res.id === editingReservation.id 
+                ? { ...res, date: newDateStr, time: newTimeStr }
+                : res
+        ));
+
+        setEditModalVisible(false);
+        Alert.alert("Sucesso", "Reserva atualizada com sucesso!");
+    };
+
+
+    // Lógica de cancelamento
     const handleCancelReservation = (id: string) => {
         Alert.alert(
             "Cancelar Reserva",
-            "Tem certeza que deseja cancelar este agendamento?",
+            "Tem certeza que deseja cancelar?",
             [
                 { text: "Não", style: "cancel" },
                 { 
@@ -102,15 +177,13 @@ const ReservationsScreen = () => {
                         setReservations(prev => prev.map(item => 
                             item.id === id ? { ...item, status: 'cancelled' } : item
                         ));
-                        // Aplicar o filtro novamente caso estivesse ativo
-                        if (isFiltering) applyDateFilter();
                     }
                 }
             ]
         );
     };
 
-    const renderItem = ({ item }: { item: typeof initialReservations[0] }) => {
+    const renderItem = ({ item }: { item: Reservation }) => {
         const statusStyle = getStatusStyle(item.status, currentColors);
         const isActive = item.status === 'active';
 
@@ -142,11 +215,11 @@ const ReservationsScreen = () => {
                             style={styles.cancelButton} 
                             onPress={() => handleCancelReservation(item.id)}
                         >
-                            <Ionicons name="close-circle-outline" size={18} color="#C05D5D" />
+                            <Ionicons name="close-circle-outline" size={18} color="#D9534F" />
                             <Text style={styles.cancelButtonText}>Cancelar</Text>
                         </TouchableOpacity>
                         
-                        <TouchableOpacity style={styles.editButton} onPress={() => Alert.alert("Editar", "Funcionalidade de edição.")}>
+                        <TouchableOpacity style={styles.editButton} onPress={() => handleOpenEdit(item)}>
                              <Text style={styles.editButtonText}>Editar</Text>
                         </TouchableOpacity>
                     </View>
@@ -156,7 +229,7 @@ const ReservationsScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={styles.safeContainer}>
             <StatusBar 
                 barStyle={theme === 'light' ? 'dark-content' : 'light-content'}
                 backgroundColor={currentColors.background}
@@ -164,8 +237,7 @@ const ReservationsScreen = () => {
 
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Minhas Reservas</Text>
-                {/* BOTÃO QUE ABRE O MODAL */}
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
                     <Ionicons 
                         name={isFiltering ? "filter" : "filter-outline"} 
                         size={22} 
@@ -185,7 +257,7 @@ const ReservationsScreen = () => {
                         <Ionicons name="calendar-number-outline" size={64} color={currentColors.muted} />
                         <Text style={styles.emptyText}>Nenhuma reserva encontrada.</Text>
                         {isFiltering && (
-                             <TouchableOpacity onPress={clearDateFilter}>
+                             <TouchableOpacity onPress={clearFilter}>
                                 <Text style={styles.clearFilterLink}>Limpar Filtro</Text>
                             </TouchableOpacity>
                         )}
@@ -193,56 +265,52 @@ const ReservationsScreen = () => {
                 )}
             />
 
-            {/* --- MODAL DE FILTROS --- */}
+            {showPicker && (
+                <DateTimePicker
+                    testID="dateTimePicker"
+                    value={pickerContext === 'filter' ? filterDate : editDate}
+                    mode={pickerMode}
+                    is24Hour={true}
+                    display="default"
+                    onChange={onDateChange}
+                />
+            )}
+
+            {/* Modal de filtro de data */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
+                visible={filterModalVisible}
+                onRequestClose={() => setFilterModalVisible(false)}
             >
-                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                <TouchableWithoutFeedback onPress={() => setFilterModalVisible(false)}>
                     <View style={styles.modalOverlay}>
                         <TouchableWithoutFeedback>
                             <View style={styles.modalContent}>
                                 <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Filtrar reservas por data:</Text>
-                                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                    <Text style={styles.modalTitle}>Filtrar por Data</Text>
+                                    <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
                                         <Ionicons name="close" size={24} color={currentColors.text} />
                                     </TouchableOpacity>
                                 </View>
 
-                                <Text style={styles.filterSectionTitle}>Data da Reserva</Text>
-                                
-                                {/* 3. SIMULAÇÃO DO DATE PICKER */}
+                                <Text style={styles.filterSectionTitle}>Data Desejada</Text>
                                 <TouchableOpacity 
                                     style={styles.datePickerButton} 
-                                    onPress={() => Alert.alert("Seletor de Data", "Aqui o picker nativo seria aberto.")}
+                                    onPress={() => showDatePicker('date', 'filter')}
                                 >
                                     <Ionicons name="calendar-outline" size={20} color={currentColors.primary} />
                                     <Text style={styles.datePickerText}>
-                                        {selectedDate.toLocaleDateString('pt-BR')}
+                                        {filterDate.toLocaleDateString('pt-BR')}
                                     </Text>
                                 </TouchableOpacity>
-                                
-                                {/* (O DateTimePicker real ficaria aqui, após a importação) */}
-                                {/* {showPicker && (
-                                    <DateTimePicker 
-                                        value={selectedDate}
-                                        mode="date"
-                                        display="default"
-                                        onChange={(event, date) => {
-                                            if (date) setSelectedDate(date);
-                                        }}
-                                    />
-                                )} */}
-
 
                                 <View style={styles.modalFooter}>
-                                    <TouchableOpacity style={styles.clearButton} onPress={clearDateFilter}>
+                                    <TouchableOpacity style={styles.clearButton} onPress={clearFilter}>
                                         <Text style={styles.clearButtonText}>Limpar</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={styles.applyButton} onPress={applyDateFilter}>
-                                        <Text style={styles.applyButtonText}>Aplicar Filtro</Text>
+                                    <TouchableOpacity style={styles.applyButton} onPress={applyFilter}>
+                                        <Text style={styles.applyButtonText}>Filtrar</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -250,12 +318,77 @@ const ReservationsScreen = () => {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+
+
+            {/* ================================================= */}
+            {/* MODAL DE EDIÇÃO (Data e Hora)                     */}
+            {/* ================================================= */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={editModalVisible}
+                onRequestClose={() => setEditModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setEditModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback>
+                            <View style={styles.modalContent}>
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Editar Reserva</Text>
+                                    <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                                        <Ionicons name="close" size={24} color={currentColors.text} />
+                                    </TouchableOpacity>
+                                </View>
+                                
+                                {editingReservation && (
+                                    <>
+                                        <Text style={styles.roomNameTitle}>{editingReservation.roomName}</Text>
+                                        <View style={styles.divider} />
+
+                                        <Text style={styles.filterSectionTitle}>Nova Data</Text>
+                                        <TouchableOpacity 
+                                            style={styles.datePickerButton} 
+                                            onPress={() => showDatePicker('date', 'edit')}
+                                        >
+                                            <Ionicons name="calendar-outline" size={20} color={currentColors.primary} />
+                                            <Text style={styles.datePickerText}>
+                                                {editDate.toLocaleDateString('pt-BR')}
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                        <Text style={styles.filterSectionTitle}>Novo Horário (Início)</Text>
+                                        <TouchableOpacity 
+                                            style={styles.datePickerButton} 
+                                            onPress={() => showDatePicker('time', 'edit')}
+                                        >
+                                            <Ionicons name="time-outline" size={20} color={currentColors.primary} />
+                                            <Text style={styles.datePickerText}>
+                                                {editTimeStart}
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                        <View style={styles.modalFooter}>
+                                            <TouchableOpacity style={styles.clearButton} onPress={() => setEditModalVisible(false)}>
+                                                <Text style={styles.clearButtonText}>Cancelar</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={styles.applyButton} onPress={handleSaveEdit}>
+                                                <Text style={styles.applyButtonText}>Salvar Alterações</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </>
+                                )}
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
         </View>
     );
 };
 
 const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFiltering: boolean) => StyleSheet.create({
-    container: {
+    safeContainer: {
         flex: 1,
         paddingTop: StatusBar.currentHeight,
         backgroundColor: currentColors.background,
@@ -291,6 +424,12 @@ const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFilter
         color: currentColors.muted,
         fontFamily: 'Atkinson-Regular',
     },
+    clearFilterLink: {
+        marginTop: 15,
+        color: currentColors.primary,
+        fontFamily: 'Inter-SemiBold',
+        fontSize: 16,
+    },
     card: {
         backgroundColor: currentColors.card,
         borderRadius: 16,
@@ -314,6 +453,12 @@ const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFilter
         fontSize: 18,
         fontFamily: 'Inter-SemiBold',
         color: currentColors.text,
+    },
+    roomNameTitle: {
+        fontSize: 18,
+        fontFamily: 'Inter-Bold',
+        color: currentColors.primary,
+        marginBottom: 10,
     },
     statusBadge: {
         paddingHorizontal: 10,
@@ -356,7 +501,7 @@ const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFilter
         backgroundColor: theme === 'light' ? '#FFF5F5' : '#3E1F1F',
     },
     cancelButtonText: {
-        color: theme === 'light' ? '#C05D5D' : '#E78F8F',
+        color: '#D9534F',
         fontFamily: 'Inter-Medium',
         fontSize: 14,
         marginLeft: 6,
@@ -391,7 +536,7 @@ const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFilter
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 20,
     },
     modalTitle: {
         fontSize: 20,
@@ -414,7 +559,7 @@ const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFilter
         borderWidth: 1,
         borderColor: currentColors.border,
         gap: 10,
-        marginBottom: 30,
+        marginBottom: 20,
         backgroundColor: currentColors.card,
     },
     datePickerText: {
@@ -451,12 +596,12 @@ const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFilter
         fontFamily: 'Inter-SemiBold',
         color: currentColors.background,
     },
-    clearFilterLink: {
-        marginTop: 15,
-        color: currentColors.primary,
-        fontFamily: 'Inter-SemiBold',
-        fontSize: 16,
-    }
+    divider: {
+        height: 1,
+        backgroundColor: currentColors.border,
+        marginBottom: 16,
+        opacity: 0.5,
+    },
 });
 
 export default ReservationsScreen;

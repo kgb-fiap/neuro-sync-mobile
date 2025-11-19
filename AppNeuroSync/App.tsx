@@ -17,7 +17,6 @@ import SignUpScreen from "./src/screens/SignUpScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import MyProfileScreen from "./src/screens/MyProfile";
 import ReservationsScreen from "./src/screens/ReservationsScreen";
-// import DetailRoomScreen from "./src/screens/DetailRoomScreen";
 // import AcessibilityScreen from "./src/screens/AccessibilityScreen";
 // import HelpScreen from "./src/screens/HelpScreen";
 
