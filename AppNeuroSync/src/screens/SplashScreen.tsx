@@ -1,7 +1,5 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, ActivityIndicator } from "react-native";
-import { useFonts } from 'expo-font';
-
 
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
@@ -11,15 +9,6 @@ const SplashScreen: React.FC = () => {
   const { theme } = useTheme();
   const currentColors = colors[theme];
   const styles = getStyles(currentColors);
-
-  const [fontsLoaded] = useFonts({
-    'Atkinson-Regular': require('../../assets/fonts/AtkinsonHyperlegible-Regular.ttf'),
-    'Atkinson-Bold': require('../../assets/fonts/AtkinsonHyperlegible-Bold.ttf'),
-    'Inter-Regular': require('../../assets/fonts/Inter-Regular.ttf'),
-    'Inter-Medium': require('../../assets/fonts/Inter-Medium.ttf'),
-    'Inter-SemiBold': require('../../assets/fonts/Inter-SemiBold.ttf'),
-    'Inter-Bold': require('../../assets/fonts/Inter-Bold.ttf'),
-  });
 
   return (
     <View style={styles.container}>
