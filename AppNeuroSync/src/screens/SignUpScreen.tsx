@@ -90,7 +90,10 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
                 text1: 'Bem-vindo(a)!',
                 text2: 'Sua conta foi criada com sucesso!',
             });
-            navigation.navigate('MainTabs');
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'MainTabs' }],
+            });
         } catch (error) {
             Toast.show({
                 type: 'error',

@@ -199,7 +199,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.header}>
                 <View>
                     <Text style={styles.headerSubtitle}>Olá, {user?.name?.split(' ')[0] || 'Visitante'}</Text>
-                    <Text style={styles.headerTitle}>Espaços Calmos</Text>
+                    <Text style={styles.headerTitle}>Ambientes de foco</Text>
                 </View>
                 <View style={styles.headerRight}>
                     <TouchableOpacity
@@ -219,9 +219,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 showsVerticalScrollIndicator={false}
                 ListHeaderComponent={() => (
                     <View style={styles.listHeaderContainer}>
-                        <Text style={styles.listHeaderTitle}>{availableRoomsCount} Salas Disponíveis</Text>
+                        <Text style={styles.listHeaderTitle}>Salas disponíveis: {availableRoomsCount}</Text>
                         <Text style={styles.listHeaderSubtitle}>
-                            {selectedNoise || selectedLight ? "Filtros aplicados." : "Escolha um ambiente adequado para o seu foco."}
+                            {selectedNoise || selectedLight ? "Filtros aplicados." : "Escolha um ambiente adequado para o seu foco:"}
                         </Text>
                     </View>
                 )}

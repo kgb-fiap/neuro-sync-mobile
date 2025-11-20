@@ -226,7 +226,9 @@ const ReservationsScreen = () => {
                     {item.local && (
                         <View style={styles.infoRow}>
                             <Ionicons name="location-outline" size={16} color={currentColors.muted} />
-                            <Text style={styles.infoText}>{item.local}</Text>
+                            <Text style={[styles.infoText, { fontFamily: 'Inter-Medium', color: currentColors.text }]}>
+                                {item.roomName} {item.local ? `• ${item.local}` : ''}
+                            </Text>
                         </View>
                     )}
                 </View>

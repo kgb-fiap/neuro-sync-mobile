@@ -42,7 +42,10 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
             return;
         }
         // console.log('Login simulado com:', email);
-        navigation.navigate('MainTabs'); 
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'MainTabs' }],
+        });
     };
 
     // Navegar para tela de Cadastro
