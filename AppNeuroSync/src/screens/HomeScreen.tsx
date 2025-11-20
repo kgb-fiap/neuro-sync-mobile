@@ -11,6 +11,7 @@ import {
     TouchableWithoutFeedback,
     Platform
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../../App';
@@ -22,11 +23,11 @@ import { useUser } from '../context/UserContext';
 
 // --- MOCK DE DADOS ---
 const allMockSalas = [
-  { id: '1', nome: 'Sala Zen 1A', ruido: 'CALMO', luz: 'BAIXA', reservada: false, local: 'Andar 1', desc: 'Ideal para foco profundo e meditação.' },
-  { id: '2', nome: 'Sala Foco B', ruido: 'MODERADO', luz: 'ALTA', reservada: false, local: 'Andar 2', desc: 'Boa iluminação para leitura e tarefas ativas.' },
-  { id: '3', nome: 'Cabine Silêncio 3', ruido: 'MÁXIMO', luz: 'MÉDIA', reservada: true, local: 'Térreo', desc: 'Isolamento acústico total.' }, 
-  { id: '4', nome: 'Sala Terapia C', ruido: 'CALMO', luz: 'MÉDIA', reservada: false, local: 'Andar 3', desc: 'Ambiente equilibrado para relaxamento.' },
-  { id: '5', nome: 'Sala Criativa D', ruido: 'MODERADO', luz: 'MÉDIA', reservada: false, local: 'Andar 1', desc: 'Espaço aberto para brainstorming leve.' },
+    { id: '1', nome: 'Sala Zen 1A', ruido: 'CALMO', luz: 'BAIXA', reservada: false, local: 'Andar 1', desc: 'Ideal para foco profundo e meditação.' },
+    { id: '2', nome: 'Sala Foco B', ruido: 'MODERADO', luz: 'ALTA', reservada: false, local: 'Andar 2', desc: 'Boa iluminação para leitura e tarefas ativas.' },
+    { id: '3', nome: 'Cabine Silêncio 3', ruido: 'MÁXIMO', luz: 'MÉDIA', reservada: true, local: 'Térreo', desc: 'Isolamento acústico total.' },
+    { id: '4', nome: 'Sala Terapia C', ruido: 'CALMO', luz: 'MÉDIA', reservada: false, local: 'Andar 3', desc: 'Ambiente equilibrado para relaxamento.' },
+    { id: '5', nome: 'Sala Criativa D', ruido: 'MODERADO', luz: 'MÉDIA', reservada: false, local: 'Andar 1', desc: 'Espaço aberto para brainstorming leve.' },
 ];
 
 type Room = typeof allMockSalas[0];
@@ -81,13 +82,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     // Lógica de seleção de data/hora
     const onChangeDate = (event: any, selectedDate?: Date) => {
         const currentDate = selectedDate || reservationDate;
-        
+
         if (Platform.OS === 'android') {
             setShowPicker(false);
         }
-        
+
         if (event.type === 'set') {
-             setReservationDate(currentDate);
+            setReservationDate(currentDate);
         }
     };
 
@@ -109,7 +110,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         if (selectedRoom) {
             const dateStr = reservationDate.toLocaleDateString('pt-BR');
             const timeStr = reservationDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            
+
             // SALVAR NO ASYNC STORAGE VIA CONTEXTO
             await createReservation({
                 roomName: selectedRoom.nome,
@@ -119,10 +120,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 date: dateStr,
                 time: timeStr
             });
-            
+
             setSalas(prev => prev.map(s => s.id === selectedRoom.id ? { ...s, reservada: true } : s));
-            
-            Alert.alert("Reserva Confirmada!", "Sua reserva foi salva e pode ser vista na aba Reservas.");
+
+            Toast.show({
+                type: 'success',
+                text1: 'Reserva Confirmada!',
+                text2: `${selectedRoom.nome} agendada com sucesso.`,
+            });
         }
     };
 
@@ -156,7 +161,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return (
             <TouchableOpacity
                 style={[styles.card, isReserved ? styles.cardReserved : styles.cardAvailable]}
-                onPress={() => handleOpenDetails(item)} 
+                onPress={() => handleOpenDetails(item)}
                 disabled={isReserved}
                 activeOpacity={0.8}
             >
@@ -195,11 +200,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                     <Text style={styles.headerTitle}>Espaços Calmos</Text>
                 </View>
                 <View style={styles.headerRight}>
-                    <TouchableOpacity 
-                        style={[styles.iconButton, (selectedNoise || selectedLight) && styles.iconButtonActive]} 
+                    <TouchableOpacity
+                        style={[styles.iconButton, (selectedNoise || selectedLight) && styles.iconButtonActive]}
                         onPress={() => setModalFilterVisible(true)}
                     >
-                        <Ionicons name="filter" size={22} color={ (selectedNoise || selectedLight) ? '#FFF' : currentColors.primary} />
+                        <Ionicons name="filter" size={22} color={(selectedNoise || selectedLight) ? '#FFF' : currentColors.primary} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -255,7 +260,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                                         {/* Seletor de data/hora */}
                                         <Text style={styles.sectionLabel}>Selecione a data e hora</Text>
                                         <View style={styles.dateTimeRow}>
-                                            
+
                                             {/* Botão de Data */}
                                             <TouchableOpacity style={styles.dateTimeButton} onPress={() => showMode('date')}>
                                                 <Ionicons name="calendar-outline" size={20} color={currentColors.primary} />

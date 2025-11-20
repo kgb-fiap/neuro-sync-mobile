@@ -1,4 +1,6 @@
 import React from "react";
+import { View, Text } from 'react-native';
+import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -96,7 +98,83 @@ const MainTabNavigator = () => {
   );
 };
 
+const getToastConfig = (theme: 'light' | 'dark'): ToastConfig => {
+  const currentColors = colors[theme];
+  
+  return {
+    success: (props) => (
+      <BaseToast
+        {...props}
+        style={{ 
+            borderLeftColor: currentColors.secondary, // Verde Suave
+            backgroundColor: currentColors.card,
+            height: 80, // Mais alto para caber texto grande
+            width: '90%',
+            borderRadius: 12,
+        }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 17,
+          fontFamily: 'Inter-SemiBold',
+          color: currentColors.text
+        }}
+        text2Style={{
+          fontSize: 15,
+          fontFamily: 'Atkinson-Regular', // Leitura fácil
+          color: currentColors.muted
+        }}
+      />
+    ),
+    error: (props) => (
+      <ErrorToast
+        {...props}
+        style={{ 
+            borderLeftColor: '#D98880', // Vermelho Suave (Coral) - Não agressivo
+            backgroundColor: currentColors.card,
+            height: 80,
+            width: '90%',
+            borderRadius: 12,
+        }}
+        text1Style={{
+          fontSize: 17,
+          fontFamily: 'Inter-SemiBold',
+          color: currentColors.text
+        }}
+        text2Style={{
+          fontSize: 15,
+          fontFamily: 'Atkinson-Regular',
+          color: currentColors.muted
+        }}
+      />
+    ),
+    info: (props) => (
+      <BaseToast
+        {...props}
+        style={{ 
+            borderLeftColor: currentColors.primary, // Azul do Tema
+            backgroundColor: currentColors.card,
+            height: 80,
+            width: '90%',
+            borderRadius: 12,
+        }}
+        text1Style={{
+          fontSize: 17,
+          fontFamily: 'Inter-SemiBold',
+          color: currentColors.text
+        }}
+        text2Style={{
+          fontSize: 15,
+          fontFamily: 'Atkinson-Regular',
+          color: currentColors.muted
+        }}
+      />
+    )
+  };
+};
+
 const AppContent = () => {
+
+  const { theme } = useTheme();
 
   const [fontsLoaded] = useFonts({
     'Atkinson-Regular': require('./assets/fonts/AtkinsonHyperlegible-Regular.ttf'),
@@ -132,6 +210,13 @@ const AppContent = () => {
           options={{ presentation: 'card' }}
         />
       </Stack.Navigator>
+
+      <Toast 
+        config={getToastConfig(theme)} 
+        visibilityTime={4000} // 4 Segundos (Tempo para TDAH/Dislexia lerem)
+        position="top"
+        topOffset={60} // Abaixo da StatusBar
+      />
     </NavigationContainer>
   );
 }

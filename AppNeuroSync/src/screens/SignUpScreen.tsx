@@ -12,6 +12,7 @@ import {
     StatusBar,
     ScrollView
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { RootStackParamList } from '../../App';
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -53,15 +54,27 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 
     const handleRegister = async () => {
         if (!nome || !email || !senha || !confirmeSenha) {
-            Alert.alert('Campos vazios', 'Por favor, preencha todos os campos.');
+            Toast.show({
+                type: 'error',
+                text1: 'Campos incompletos',
+                text2: 'Por favor, preencha todos os dados!',
+            });
             return;
         }
         if (senha !== confirmeSenha) {
-            Alert.alert('Senhas não conferem', 'As senhas digitadas são diferentes.');
+            Toast.show({
+                type: 'error',
+                text1: 'Atenção',
+                text2: 'As senhas digitadas não conferem!',
+            });
             return;
         }
         if (!sensoryProfile) {
-            Alert.alert('Perfil Sensorial', 'Por favor, selecione um tipo de sensibilidade para personalizarmos sua experiência.');
+            Toast.show({
+                type: 'info',
+                text1: 'Perfil Sensorial',
+                text2: 'Selecione uma opção para personalizarmos o app!',
+            });
             return;
         }
 
@@ -71,11 +84,18 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
                 email: email,
                 sensoryProfile: sensoryProfile
             });
-
-            Alert.alert("Sucesso", "Conta criada com sucesso!");
+            Toast.show({
+                type: 'success',
+                text1: 'Bem-vindo(a)!',
+                text2: 'Sua conta foi criada com sucesso!',
+            });
             navigation.navigate('MainTabs');
         } catch (error) {
-            Alert.alert("Erro", "Não foi possível criar a conta.");
+            Toast.show({
+                type: 'error',
+                text1: 'Erro no cadastro',
+                text2: 'Não foi possível criar a conta. Tente novamente',
+            });
         }
     };
 
