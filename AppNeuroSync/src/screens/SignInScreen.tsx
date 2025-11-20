@@ -15,9 +15,11 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { RootStackParamList } from '../../App';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
+import { useUser } from '../context/UserContext';
 
 type SignInScreenNavigationProp = StackNavigationProp<RootStackParamList, "SignIn">;
 
@@ -38,17 +40,56 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
     // -- Estado para visualizar a senha ---
     const [showPassword, setShowPassword] = useState(false);
 
+    // -- Função do contexto de usuário --
+    const { register } = useUser();
+
     // Validação de login
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (email === '' || senha === '') {
-            Alert.alert('Campos vazios', 'Por favor, preencha o email e a senha.');
-            return;
+            Toast.show({
+                type: 'error',
+                text1: 'Campos vazios',
+                text2: 'Por favor, preencha o email e a senha.'
+            });
         }
+        await register({
+            name: "Usuário Retornante",
+            email: email,
+            sensoryProfile: "both" // Mock
+        });
         // console.log('Login simulado com:', email);
         navigation.reset({
             index: 0,
             routes: [{ name: 'MainTabs' }],
         });
+    };
+
+    // Função de login como convidado
+    const handleGuestLogin = async () => {
+        const mockGuest = {
+            name: "Usuário Convidadp",
+            email: "guest@fiap.com.br",
+            sensoryProfile: "visual"
+        };
+
+        try {
+            // Salva o usuário no contexto/storage como se tivesse acabado de logar
+            await register(mockGuest);
+            
+            Toast.show({
+                type: 'success',
+                text1: 'Modo Convidado',
+                text2: 'Acesso liberado para testes.',
+            });
+
+            // Navega para o App
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'MainTabs' }],
+            });
+        } catch (error) {
+            Toast.show({ type: 'error', text1: 'Erro', text2: 'Falha ao entrar como convidado.' });
+        }
     };
 
     // Navegar para tela de Cadastro
@@ -119,6 +160,18 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
                     <TouchableOpacity style={styles.linkButton}>
                         <Text style={styles.linkText}>Esqueceu a senha?</Text>
                     </TouchableOpacity>
+
+                    <View style={styles.dividerContainer}>
+                        <View style={styles.dividerLine} />
+                        <Text style={styles.dividerText}>OU</Text>
+                        <View style={styles.dividerLine} />
+                    </View>
+
+                    <TouchableOpacity style={styles.guestButton} onPress={handleGuestLogin}>
+                        <Ionicons name="flask-outline" size={20} color={currentColors.primary} style={{ marginRight: 8 }} />
+                        <Text style={styles.guestButtonText}>Entrar como convidado</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity
                         style={styles.linkButton}
                         onPress={handleNavigateToRegister}
@@ -231,6 +284,41 @@ const getStyles = (currentColors: ThemeColors) => StyleSheet.create({
         fontFamily: 'Inter-Regular',
         paddingBottom: 50, 
     },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '85%',
+        marginTop: 30,
+        marginBottom: 20,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: currentColors.border,
+    },
+    dividerText: {
+        marginHorizontal: 10,
+        color: currentColors.muted,
+        fontFamily: 'Inter-Medium',
+        fontSize: 12,
+    },
+    guestButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '85%',
+        height: 50,
+        backgroundColor: 'transparent',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: currentColors.primary,
+        borderStyle: 'dashed',
+    },
+    guestButtonText: {
+        color: currentColors.primary,
+        fontSize: 16,
+        fontFamily: 'Inter-SemiBold',
+    }
 });
 
 export default SignInScreen;
