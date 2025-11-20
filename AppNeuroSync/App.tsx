@@ -17,8 +17,8 @@ import SignUpScreen from "./src/screens/SignUpScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import MyProfileScreen from "./src/screens/MyProfile";
 import ReservationsScreen from "./src/screens/ReservationsScreen";
-// import AcessibilityScreen from "./src/screens/AccessibilityScreen";
-// import HelpScreen from "./src/screens/HelpScreen";
+import AccessibilityScreen from "./src/screens/AccessibilityScreen";
+import HelpScreen from "./src/screens/HelpScreen";
 
 export type MainTabParamList = {
   SignIn: undefined;
@@ -33,6 +33,8 @@ export type RootStackParamList = {
   SignUp: undefined;
   Home: undefined;
   MainTabs: undefined;
+  Accessibility: undefined;
+  Help: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -116,6 +118,16 @@ const AppContent = () => {
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+        <Stack.Screen
+          name="Accessibility"
+          component={AccessibilityScreen}
+          options={{ presentation: 'card' }}
+        />
+        <Stack.Screen
+          name="Help"
+          component={HelpScreen}
+          options={{ presentation: 'card' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

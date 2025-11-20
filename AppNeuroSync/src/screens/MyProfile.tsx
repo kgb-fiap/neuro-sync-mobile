@@ -43,6 +43,16 @@ const MyProfileScreen = () => {
         setNotificationsEnabled(previousState => !previousState);
     };
 
+    // Navegar para a tela de Acessibilidade
+    const handleNavigateToAccessibility = () => {
+        navigation.navigate('Accessibility');
+    }
+
+    // Navegar para a tela de Ajuda e Suporte
+    const handleNavigateToHelp = () => {
+        navigation.navigate('Help');
+    };
+
     // Efetuar logout
     const handleLogout = () => {
         Alert.alert(
@@ -167,7 +177,7 @@ const MyProfileScreen = () => {
                         <MenuItem
                             icon="accessibility-outline"
                             label="Acessibilidade"
-                            onPress={() => Alert.alert("Acessibilidade", "Ajustar contraste e tamanho da fonte.")}
+                            onPress={handleNavigateToAccessibility}
                         />
                     </View>
                 </View>
@@ -177,7 +187,7 @@ const MyProfileScreen = () => {
                         <MenuItem
                             icon="help-circle-outline"
                             label="Ajuda e Suporte"
-                            onPress={() => Alert.alert("Ajuda", "Entrar em contato com o suporte.")}
+                            onPress={handleNavigateToHelp}
                         />
                         <View style={styles.divider} />
                         <MenuItem

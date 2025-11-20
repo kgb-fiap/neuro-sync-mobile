@@ -7,9 +7,9 @@ import {
     StyleSheet,
     StatusBar,
     Alert,
-    Modal, // Importado
-    TouchableWithoutFeedback, // Importado
-    Platform // Importado para lógica de data
+    Modal,
+    TouchableWithoutFeedback,
+    Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
@@ -288,7 +288,7 @@ const ReservationsScreen = () => {
                         <TouchableWithoutFeedback>
                             <View style={styles.modalContent}>
                                 <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Filtrar por Data</Text>
+                                    <Text style={styles.modalTitle}>Filtrar por data:</Text>
                                     <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
                                         <Ionicons name="close" size={24} color={currentColors.text} />
                                     </TouchableOpacity>
