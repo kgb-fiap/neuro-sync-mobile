@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
+import { useUser } from '../context/UserContext';
 
 type SignUpScreenNavigationProp = StackNavigationProp<RootStackParamList, "SignUp">;
 
@@ -45,10 +46,12 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [confirmeSenha, setConfirmeSenha] = useState('');
-
     const [sensoryProfile, setSensoryProfile] = useState<string | null>(null);
 
-    const handleRegister = () => {
+    // --- Contexto de Usuário ---
+    const { register } = useUser();
+
+    const handleRegister = async () => {
         if (!nome || !email || !senha || !confirmeSenha) {
             Alert.alert('Campos vazios', 'Por favor, preencha todos os campos.');
             return;
@@ -62,8 +65,18 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             return;
         }
 
-        console.log('Cadastro simulado:', { nome, email, sensoryProfile });
-        navigation.navigate('MainTabs');
+        try {
+            await register({
+                name: nome,
+                email: email,
+                sensoryProfile: sensoryProfile
+            });
+
+            Alert.alert("Sucesso", "Conta criada com sucesso!");
+            navigation.navigate('MainTabs');
+        } catch (error) {
+            Alert.alert("Erro", "Não foi possível criar a conta.");
+        }
     };
 
     const handleNavigateToLogin = () => {

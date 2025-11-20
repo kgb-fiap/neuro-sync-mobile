@@ -17,18 +17,19 @@ import { MainTabParamList, RootStackParamList } from '../../App';
 
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
-
-// --- DADOS MOCKADOS DO USUÁRIO ---
-const mockUser = {
-    name: "Maria Silva",
-    email: "maria.silva@fiap.com.br",
-    sensoryProfile: "Estimulação Eletrônica (Preferência por baixa luz)",
-};
+import { useUser } from '../context/UserContext';
 
 type ProfileScreenNavigationProp = CompositeNavigationProp<
     BottomTabNavigationProp<MainTabParamList, 'Profile'>,
     StackNavigationProp<RootStackParamList>
 >;
+
+const SENSORY_LABELS: Record<string, string> = {
+    'visual': 'Sensível à Luz',
+    'audio': 'Sensível a Ruído',
+    'both': 'Sensível à Luz e Ruído',
+    'none': 'Sem sensibilidade específica'
+};
 
 const MyProfileScreen = () => {
     const navigation = useNavigation<ProfileScreenNavigationProp>();
@@ -37,11 +38,12 @@ const MyProfileScreen = () => {
     const currentColors = colors[theme];
     const styles = getStyles(currentColors, theme);
 
+    // --- Contexto do usuário ---
+    const { user, logout } = useUser();
+
     // Estado para notificações
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
-    const toggleNotifications = () => {
-        setNotificationsEnabled(previousState => !previousState);
-    };
+    const toggleNotifications = () => setNotificationsEnabled(prev => !prev);
 
     // Navegar para a tela de Acessibilidade
     const handleNavigateToAccessibility = () => {
@@ -53,25 +55,25 @@ const MyProfileScreen = () => {
         navigation.navigate('Help');
     };
 
-    // Efetuar logout
+    // Função auxiliar para traduzir o ID
+    const getSensoryLabel = (id?: string) => {
+        if (!id) return 'Não definido';
+        return SENSORY_LABELS[id] || id;
+    };
+
+    // Função de Logout
     const handleLogout = () => {
-        Alert.alert(
-            "Sair",
-            "Deseja realmente sair do Neuro-Sync?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Sair",
-                    style: "destructive",
-                    onPress: () => {
-                        navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'SignIn' }],
-                        });
-                    }
-                }
-            ]
-        );
+        Alert.alert("Sair", "...", [
+            { text: "Cancelar", style: "cancel" },
+            { 
+                text: "Sair", 
+                style: "destructive",
+                onPress: async () => {
+                    await logout();
+                    navigation.reset({ index: 0, routes: [{ name: 'SignIn' }] });
+                } 
+            }
+        ]);
     };
 
     const MenuItem = ({ icon, label, onPress, isDestructive = false }: { icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void, isDestructive?: boolean }) => (
@@ -95,111 +97,109 @@ const MyProfileScreen = () => {
     return (
         <View style={styles.container}>
 
-            <StatusBar
+            <StatusBar 
                 barStyle={theme === 'light' ? 'dark-content' : 'light-content'}
                 backgroundColor={currentColors.background}
             />
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
+                
                 <View style={styles.headerProfile}>
                     <View style={styles.avatarContainer}>
                         <Ionicons name="person" size={40} color="#FFF" />
                     </View>
-                    <Text style={styles.userName}>{mockUser.name}</Text>
+                    <Text style={styles.userName}>{user?.name || "Visitante"}</Text>
+                    <Text style={styles.userRole}>Colaborador</Text>
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Informações Pessoais</Text>
-
+                    
                     <View style={styles.infoCard}>
                         <View style={styles.infoRow}>
                             <Text style={styles.infoLabel}>E-mail</Text>
-                            <Text style={styles.infoValue}>{mockUser.email}</Text>
+                            <Text style={styles.infoValue}>{user?.email || "-"}</Text>
                         </View>
                         <View style={styles.divider} />
                         <View style={styles.infoRow}>
                             <Text style={styles.infoLabel}>Perfil Sensorial</Text>
-                            <Text style={styles.infoValue}>{mockUser.sensoryProfile}</Text>
+                            <Text style={styles.infoValue}>{getSensoryLabel(user?.sensoryProfile)}</Text>
                         </View>
                     </View>
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Configurações</Text>
-
+                    
                     <View style={styles.menuCard}>
                         <TouchableOpacity style={styles.menuItem} onPress={toggleTheme}>
                             <View style={styles.menuItemLeft}>
                                 <View style={styles.iconContainer}>
-                                    <Ionicons
-                                        name={theme === 'light' ? "moon-outline" : "sunny-outline"}
-                                        size={22}
-                                        color={currentColors.primary}
+                                    <Ionicons 
+                                        name={theme === 'light' ? "moon-outline" : "sunny-outline"} 
+                                        size={22} 
+                                        color={currentColors.primary} 
                                     />
                                 </View>
                                 <Text style={styles.menuItemText}>
-                                    Alternar para Tema {theme === 'light' ? 'Escuro' : 'Claro'}
+                                    Tema {theme === 'light' ? 'Escuro' : 'Claro'}
                                 </Text>
                             </View>
-                            <Ionicons
-                                name={theme === 'light' ? "toggle-outline" : "toggle"}
-                                size={28}
-                                color={currentColors.primary}
+                            <Ionicons 
+                                name={theme === 'light' ? "toggle-outline" : "toggle"} 
+                                size={28} 
+                                color={currentColors.primary} 
                             />
                         </TouchableOpacity>
-
+                        
                         <View style={styles.divider} />
-
-                        <TouchableOpacity style={styles.menuItem} onPress={toggleNotifications}>
+                        
+                         <TouchableOpacity style={styles.menuItem} onPress={toggleNotifications}>
                             <View style={styles.menuItemLeft}>
                                 <View style={styles.iconContainer}>
-                                    <Ionicons
+                                    <Ionicons 
                                         name={notificationsEnabled ? "notifications-outline" : "notifications-off-outline"}
-                                        size={22}
-                                        color={notificationsEnabled ? currentColors.primary : currentColors.muted}
+                                        size={22} 
+                                        color={notificationsEnabled ? currentColors.primary : currentColors.muted} 
                                     />
                                 </View>
-                                <Text style={styles.menuItemText}>
-                                    Notificações
-                                </Text>
+                                <Text style={styles.menuItemText}>Notificações</Text>
                             </View>
-
-                            <Ionicons
-                                name={notificationsEnabled ? "toggle" : "toggle-outline"}
-                                size={28}
-                                color={notificationsEnabled ? currentColors.primary : currentColors.muted}
+                            <Ionicons 
+                                name={notificationsEnabled ? "toggle" : "toggle-outline"} 
+                                size={28} 
+                                color={notificationsEnabled ? currentColors.primary : currentColors.muted} 
                             />
                         </TouchableOpacity>
-
+                        
                         <View style={styles.divider} />
-
-                        <MenuItem
-                            icon="accessibility-outline"
-                            label="Acessibilidade"
-                            onPress={handleNavigateToAccessibility}
+                        
+                        <MenuItem 
+                            icon="accessibility-outline" 
+                            label="Acessibilidade" 
+                            onPress={handleNavigateToAccessibility} 
                         />
                     </View>
                 </View>
 
                 <View style={styles.section}>
                     <View style={styles.menuCard}>
-                        <MenuItem
-                            icon="help-circle-outline"
-                            label="Ajuda e Suporte"
-                            onPress={handleNavigateToHelp}
+                         <MenuItem 
+                            icon="help-circle-outline" 
+                            label="Ajuda e Suporte" 
+                            onPress={handleNavigateToHelp} 
                         />
                         <View style={styles.divider} />
-                        <MenuItem
-                            icon="log-out-outline"
-                            label="Sair da conta"
+                        <MenuItem 
+                            icon="log-out-outline" 
+                            label="Sair da conta" 
                             onPress={handleLogout}
                             isDestructive
                         />
                     </View>
                 </View>
-
-                <Text style={styles.versionText}>Neuro-Sync v1.0.2</Text>
+                
+                <Text style={styles.versionText}>Neuro-Sync v1.0.3</Text>
 
             </ScrollView>
 

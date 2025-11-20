@@ -10,6 +10,9 @@ import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { colors } from './src/theme/colors';
 import { useFonts } from 'expo-font';
 
+// Importando o contexto de usuário
+import { UserProvider } from './src/context/UserContext';
+
 // Importando as telas
 import SplashScreen from "./src/screens/SplashScreen";
 import SignInScreen from "./src/screens/SignInScreen";
@@ -136,7 +139,9 @@ const AppContent = () => {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <UserProvider>
+        <AppContent />
+      </UserProvider>
     </ThemeProvider>
   );
 }

@@ -18,12 +18,6 @@ import { RootStackParamList } from '../../App';
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
 
-if (Platform.OS === 'android') {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-        UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-}
-
 // --- MOCK DE FAQ ---
 const faqs = [
     {

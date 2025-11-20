@@ -11,6 +11,7 @@ import {
     TouchableWithoutFeedback,
     Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -18,24 +19,16 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { MainTabParamList, RootStackParamList } from '../../App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+import { useUser, Reservation } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
-
-// --- MOCK DE DADOS DE RESERVAS ---
-const initialReservations = [
-    { id: '1', roomName: 'Sala Zen 1A', date: '19 Nov, 2025', time: '14:00 - 15:00', status: 'active' },
-    { id: '2', roomName: 'Sala Foco B', date: '20 Nov, 2025', time: '09:00 - 11:00', status: 'active' },
-    { id: '3', roomName: 'Cabine Silêncio 3', date: '15 Nov, 2025', time: '10:00 - 10:30', status: 'completed' },
-    { id: '4', roomName: 'Sala Terapia C', date: '19 Nov, 2025', time: '16:00 - 17:00', status: 'cancelled' },
-];
-
-type Reservation = typeof initialReservations[0];
 
 type ReservationsScreenNavigationProp = CompositeNavigationProp<
     BottomTabNavigationProp<MainTabParamList, 'Reservations'>,
     StackNavigationProp<RootStackParamList>
 >;
 
+// Função auxiliar para cores
 const getStatusStyle = (status: string, currentColors: ThemeColors) => {
     switch (status) {
         case 'active':
@@ -54,32 +47,33 @@ const ReservationsScreen = () => {
     
     const { theme } = useTheme();
     const currentColors = colors[theme];
-    const styles = getStyles(currentColors, theme, false); // isFiltering false por padrão
+    const [isFiltering, setIsFiltering] = useState(false);
+    const styles = getStyles(currentColors, theme, isFiltering);
 
-    // --- Estados principais ---
-    const [reservations, setReservations] = useState(initialReservations);
+    // --- Estado ---
+    const { reservations, cancelReservation, updateReservation } = useUser();
 
-    // --- Estados de filtro ---
+    // --- ESTADOS DE FILTRO ---
+    const [filteredReservations, setFilteredReservations] = useState<Reservation[] | null>(null);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [filterDate, setFilterDate] = useState<Date>(new Date());
-    const [isFiltering, setIsFiltering] = useState(false);
 
-    // --- Estados de edição ---
+    // --- ESTADOS DE EDIÇÃO ---
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
     
-    // --- Estados temporários para edição ---
     const [editDate, setEditDate] = useState<Date>(new Date());
     const [editTimeStart, setEditTimeStart] = useState("09:00");
     
-    // --- Estados para o DatePicker nativo ---
+    // Estados para o DatePicker (Nativo)
     const [showPicker, setShowPicker] = useState(false);
     const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
-    // Define quem está chamando o picker: 'filter' ou 'edit'
     const [pickerContext, setPickerContext] = useState<'filter' | 'edit'>('filter'); 
 
+    // Dados a serem exibidos (Filtrados ou Todos)
+    const displayData = filteredReservations || reservations;
 
-    // --- LÓGICA DE DATE PICKER NATIVO ---
+    // --- DATE PICKER LÓGICA ---
     const showDatePicker = (mode: 'date' | 'time', context: 'filter' | 'edit') => {
         setPickerMode(mode);
         setPickerContext(context);
@@ -93,11 +87,10 @@ const ReservationsScreen = () => {
             if (pickerContext === 'filter') {
                 setFilterDate(selectedDate);
             } else {
-                // Contexto de Edição
+                // Edição
                 if (pickerMode === 'date') {
                     setEditDate(selectedDate);
                 } else {
-                    // Se for horário, atualiza a string de hora
                     const timeStr = selectedDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                     setEditTimeStart(timeStr);
                 }
@@ -105,84 +98,88 @@ const ReservationsScreen = () => {
         }
     };
 
-    // Funções de filtro
-    const applyFilter = () => {
-        const targetString = filterDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-        // Ex: "19 Nov, 2025" (formato do mock) - Ajuste conforme seu locale real
-        // Para simplificar o mock, vamos usar uma comparação básica de string
-        // Na vida real, usaria objetos Date reais nas reservas
-        
-        // Mock de formatação para bater com "19 Nov, 2025"
-        const day = filterDate.getDate();
-        const month = filterDate.toLocaleDateString('en-US', { month: 'short' });
-        const year = filterDate.getFullYear();
-        const searchStr = `${day} ${month}, ${year}`;
-
-        const filtered = initialReservations.filter(res => res.date === searchStr);
-        setReservations(filtered);
-        setIsFiltering(true);
-        setFilterModalVisible(false);
-    };
-
-    const clearFilter = () => {
-        setReservations(initialReservations);
-        setIsFiltering(false);
-        setFilterModalVisible(false);
-    };
-
-    // Funções de edição
-    const handleOpenEdit = (reservation: Reservation) => {
-        setEditingReservation(reservation);
-        // Parser simples da data string para objeto Date (Mock)
-        // Na vida real: new Date(reservation.dateISO)
-        setEditDate(new Date()); 
-        setEditTimeStart(reservation.time.split(' - ')[0]); // Pega o horário inicial
-        setEditModalVisible(true);
-    };
-
-    const handleSaveEdit = () => {
-        if (!editingReservation) return;
-
-        // Formata a nova data para string (padrão do mock)
-        const day = editDate.getDate();
-        const month = editDate.toLocaleDateString('en-US', { month: 'short' });
-        const year = editDate.getFullYear();
-        const newDateStr = `${day} ${month}, ${year}`;
-        
-        // Cria novo horário (mantendo duração de 1h fixa para o mock)
-        const newTimeStr = `${editTimeStart} - ...`; 
-
-        setReservations(prev => prev.map(res => 
-            res.id === editingReservation.id 
-                ? { ...res, date: newDateStr, time: newTimeStr }
-                : res
-        ));
-
-        setEditModalVisible(false);
-        Alert.alert("Sucesso", "Reserva atualizada com sucesso!");
-    };
-
-
-    // Lógica de cancelamento
+    // --- LÓGICA DE CANCELAMENTO (ASYNC) ---
     const handleCancelReservation = (id: string) => {
         Alert.alert(
             "Cancelar Reserva",
-            "Tem certeza que deseja cancelar?",
+            "Tem certeza que deseja cancelar este agendamento?",
             [
                 { text: "Não", style: "cancel" },
                 { 
                     text: "Sim, cancelar", 
                     style: "destructive",
-                    onPress: () => {
-                        setReservations(prev => prev.map(item => 
-                            item.id === id ? { ...item, status: 'cancelled' } : item
-                        ));
+                    onPress: async () => {
+                        try {
+                            await cancelReservation(id); // Chama o contexto
+                            // Se estiver filtrando, re-aplicar filtro
+                            if (isFiltering) clearFilter(); 
+                        } catch (error) {
+                            Alert.alert("Erro", "Falha ao cancelar reserva.");
+                        }
                     }
                 }
             ]
         );
     };
 
+    // --- LÓGICA DE EDIÇÃO (ABRIR) ---
+    const handleOpenEdit = (reservation: Reservation) => {
+        setEditingReservation(reservation);
+        // Tenta converter a string de data de volta para objeto Date (simplificado)
+        // Como salvamos string formatada, aqui resetamos para 'hoje' para facilitar o exemplo
+        setEditDate(new Date()); 
+        setEditTimeStart(reservation.time.split(' - ')[0]); 
+        setEditModalVisible(true);
+    };
+
+    // --- LÓGICA DE EDIÇÃO (SALVAR ASYNC) ---
+    const handleSaveEdit = async () => {
+        if (!editingReservation) return;
+
+        const day = editDate.getDate();
+        // Garantir mês com letra maiúscula ou padrão consistente
+        const month = editDate.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''); 
+        const year = editDate.getFullYear();
+        
+        // Formato deve bater com o que usamos no createReservation
+        // Ex: 19 nov 2025 (depende do locale, ajuste conforme necessidade)
+        const newDateStr = editDate.toLocaleDateString('pt-BR'); 
+        const newTimeStr = editTimeStart;
+
+        try {
+            await updateReservation(editingReservation.id, {
+                date: newDateStr,
+                time: newTimeStr
+            });
+            
+            setEditModalVisible(false);
+            Alert.alert("Sucesso", "Reserva atualizada!");
+            if (isFiltering) clearFilter();
+        } catch (error) {
+            Alert.alert("Erro", "Não foi possível atualizar a reserva.");
+        }
+    };
+
+    // --- LÓGICA DE FILTRO ---
+    const applyFilter = () => {
+        // Filtro exato pela string de data (simplificado)
+        // O ideal seria comparar timestamps, mas vamos comparar a string formatada
+        const targetString = filterDate.toLocaleDateString('pt-BR');
+        
+        const filtered = reservations.filter(res => res.date === targetString);
+        
+        setFilteredReservations(filtered);
+        setIsFiltering(true);
+        setFilterModalVisible(false);
+    };
+
+    const clearFilter = () => {
+        setFilteredReservations(null);
+        setIsFiltering(false);
+        setFilterModalVisible(false);
+    };
+
+    // --- RENDER ITEM ---
     const renderItem = ({ item }: { item: Reservation }) => {
         const statusStyle = getStatusStyle(item.status, currentColors);
         const isActive = item.status === 'active';
@@ -207,6 +204,12 @@ const ReservationsScreen = () => {
                         <Ionicons name="time-outline" size={16} color={currentColors.muted} />
                         <Text style={styles.infoText}>{item.time}</Text>
                     </View>
+                    {item.local && (
+                         <View style={styles.infoRow}>
+                            <Ionicons name="location-outline" size={16} color={currentColors.muted} />
+                            <Text style={styles.infoText}>{item.local}</Text>
+                        </View>
+                    )}
                 </View>
 
                 {isActive && (
@@ -229,7 +232,7 @@ const ReservationsScreen = () => {
     };
 
     return (
-        <View style={styles.safeContainer}>
+        <SafeAreaView style={styles.safeContainer}>
             <StatusBar 
                 barStyle={theme === 'light' ? 'dark-content' : 'light-content'}
                 backgroundColor={currentColors.background}
@@ -247,7 +250,7 @@ const ReservationsScreen = () => {
             </View>
 
             <FlatList
-                data={reservations}
+                data={displayData}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 contentContainerStyle={styles.listContent}
@@ -255,7 +258,9 @@ const ReservationsScreen = () => {
                 ListEmptyComponent={() => (
                     <View style={styles.emptyState}>
                         <Ionicons name="calendar-number-outline" size={64} color={currentColors.muted} />
-                        <Text style={styles.emptyText}>Nenhuma reserva encontrada.</Text>
+                        <Text style={styles.emptyText}>
+                            {isFiltering ? "Nenhuma reserva nesta data." : "Você não tem reservas."}
+                        </Text>
                         {isFiltering && (
                              <TouchableOpacity onPress={clearFilter}>
                                 <Text style={styles.clearFilterLink}>Limpar Filtro</Text>
@@ -276,7 +281,7 @@ const ReservationsScreen = () => {
                 />
             )}
 
-            {/* Modal de filtro de data */}
+            {/* Modal de filtro */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -288,7 +293,7 @@ const ReservationsScreen = () => {
                         <TouchableWithoutFeedback>
                             <View style={styles.modalContent}>
                                 <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Filtrar por data:</Text>
+                                    <Text style={styles.modalTitle}>Filtrar por Data</Text>
                                     <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
                                         <Ionicons name="close" size={24} color={currentColors.text} />
                                     </TouchableOpacity>
@@ -307,7 +312,7 @@ const ReservationsScreen = () => {
 
                                 <View style={styles.modalFooter}>
                                     <TouchableOpacity style={styles.clearButton} onPress={clearFilter}>
-                                        <Text style={styles.clearButtonText}>Limpar</Text>
+                                        <Text style={styles.clearButtonText}>Todos</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={styles.applyButton} onPress={applyFilter}>
                                         <Text style={styles.applyButtonText}>Filtrar</Text>
@@ -319,10 +324,7 @@ const ReservationsScreen = () => {
                 </TouchableWithoutFeedback>
             </Modal>
 
-
-            {/* ================================================= */}
-            {/* MODAL DE EDIÇÃO (Data e Hora)                     */}
-            {/* ================================================= */}
+            {/* Modal de edição */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -356,7 +358,7 @@ const ReservationsScreen = () => {
                                             </Text>
                                         </TouchableOpacity>
 
-                                        <Text style={styles.filterSectionTitle}>Novo Horário (Início)</Text>
+                                        <Text style={styles.filterSectionTitle}>Novo Horário</Text>
                                         <TouchableOpacity 
                                             style={styles.datePickerButton} 
                                             onPress={() => showDatePicker('time', 'edit')}
@@ -372,7 +374,7 @@ const ReservationsScreen = () => {
                                                 <Text style={styles.clearButtonText}>Cancelar</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity style={styles.applyButton} onPress={handleSaveEdit}>
-                                                <Text style={styles.applyButtonText}>Salvar Alterações</Text>
+                                                <Text style={styles.applyButtonText}>Salvar</Text>
                                             </TouchableOpacity>
                                         </View>
                                     </>
@@ -383,14 +385,13 @@ const ReservationsScreen = () => {
                 </TouchableWithoutFeedback>
             </Modal>
 
-        </View>
+        </SafeAreaView>
     );
 };
 
 const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFiltering: boolean) => StyleSheet.create({
     safeContainer: {
         flex: 1,
-        paddingTop: StatusBar.currentHeight,
         backgroundColor: currentColors.background,
     },
     header: {
@@ -410,7 +411,7 @@ const getStyles = (currentColors: ThemeColors, theme: 'light' | 'dark', isFilter
     },
     listContent: {
         padding: 24,
-        paddingBottom: 40,
+        paddingBottom: 100,
     },
     emptyState: {
         alignItems: 'center',

@@ -18,9 +18,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { useTheme } from '../context/ThemeContext';
 import { colors, ThemeColors } from '../theme/colors';
+import { useUser } from '../context/UserContext';
 
 // --- MOCK DE DADOS ---
-const USER_NAME = "Maria Silva"; 
 const allMockSalas = [
   { id: '1', nome: 'Sala Zen 1A', ruido: 'CALMO', luz: 'BAIXA', reservada: false, local: 'Andar 1', desc: 'Ideal para foco profundo e meditação.' },
   { id: '2', nome: 'Sala Foco B', ruido: 'MODERADO', luz: 'ALTA', reservada: false, local: 'Andar 2', desc: 'Boa iluminação para leitura e tarefas ativas.' },
@@ -75,6 +75,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
     const availableRoomsCount = salas.filter(s => !s.reservada).length;
 
+    // --- Contexto de Usuário ---
+    const { createReservation, user } = useUser();
+
     // Lógica de seleção de data/hora
     const onChangeDate = (event: any, selectedDate?: Date) => {
         const currentDate = selectedDate || reservationDate;
@@ -100,18 +103,26 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         setDetailsModalVisible(true);
     };
 
-    const handleConfirmReservation = () => {
+    const handleConfirmReservation = async () => {
         setDetailsModalVisible(false);
+
         if (selectedRoom) {
-            setSalas(prev => prev.map(s => s.id === selectedRoom.id ? { ...s, reservada: true } : s));
-            
             const dateStr = reservationDate.toLocaleDateString('pt-BR');
             const timeStr = reservationDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             
-            Alert.alert(
-                "Reserva Confirmada!", 
-                `Sala: ${selectedRoom.nome}\nData: ${dateStr}\nHorário: ${timeStr}`
-            );
+            // SALVAR NO ASYNC STORAGE VIA CONTEXTO
+            await createReservation({
+                roomName: selectedRoom.nome,
+                local: selectedRoom.local,
+                ruido: selectedRoom.ruido,
+                luz: selectedRoom.luz,
+                date: dateStr,
+                time: timeStr
+            });
+            
+            setSalas(prev => prev.map(s => s.id === selectedRoom.id ? { ...s, reservada: true } : s));
+            
+            Alert.alert("Reserva Confirmada!", "Sua reserva foi salva e pode ser vista na aba Reservas.");
         }
     };
 
@@ -180,7 +191,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
             <View style={styles.header}>
                 <View>
-                    <Text style={styles.headerSubtitle}>Olá, {USER_NAME.split(' ')[0]}</Text>
+                    <Text style={styles.headerSubtitle}>Olá, {user?.name?.split(' ')[0] || 'Visitante'}</Text>
                     <Text style={styles.headerTitle}>Espaços Calmos</Text>
                 </View>
                 <View style={styles.headerRight}>
