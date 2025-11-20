@@ -49,6 +49,10 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     const [confirmeSenha, setConfirmeSenha] = useState('');
     const [sensoryProfile, setSensoryProfile] = useState<string | null>(null);
 
+    // -- Estado para visualizar a senha ---
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     // --- Contexto de Usuário ---
     const { register } = useUser();
 
@@ -152,22 +156,32 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
                         value={email}
                         onChangeText={setEmail}
                     />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Senha"
-                        placeholderTextColor={currentColors.muted}
-                        secureTextEntry
-                        value={senha}
-                        onChangeText={setSenha}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Confirme a senha"
-                        placeholderTextColor={currentColors.muted}
-                        secureTextEntry
-                        value={confirmeSenha}
-                        onChangeText={setConfirmeSenha}
-                    />
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Senha"
+                            placeholderTextColor={currentColors.muted}
+                            secureTextEntry={!showPassword}
+                            value={senha}
+                            onChangeText={setSenha}
+                        />
+                        <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
+                            <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={24} color={currentColors.muted} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Confirme a senha"
+                            placeholderTextColor={currentColors.muted}
+                            secureTextEntry={!showConfirmPassword}
+                            value={confirmeSenha}
+                            onChangeText={setConfirmeSenha}
+                        />
+                        <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            <Ionicons name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} size={24} color={currentColors.muted} />
+                        </TouchableOpacity>
+                    </View>
 
                     <View style={styles.divider} />
 
@@ -267,6 +281,29 @@ const getStyles = (currentColors: ThemeColors) => StyleSheet.create({
         borderColor: currentColors.border,
         color: currentColors.text,
         fontFamily: 'Atkinson-Regular',
+    },
+    passwordContainer: {
+        width: '85%',
+        height: 55,
+        backgroundColor: currentColors.card,
+        borderRadius: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: currentColors.border,
+        marginBottom: 15,
+    },
+    passwordInput: {
+        flex: 1,
+        height: '100%',
+        paddingLeft: 20,
+        fontSize: 16,
+        color: currentColors.text,
+        fontFamily: 'Atkinson-Regular',
+    },
+    eyeIcon: {
+        padding: 10,
+        paddingRight: 15,
     },
     sensoryContainer: {
         width: '100%',

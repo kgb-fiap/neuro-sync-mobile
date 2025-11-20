@@ -35,6 +35,9 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
 
+    // -- Estado para visualizar a senha ---
+    const [showPassword, setShowPassword] = useState(false);
+
     // Validação de login
     const handleLogin = () => {
         if (email === '' || senha === '') {
@@ -89,14 +92,26 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
                         value={email}
                         onChangeText={setEmail}
                     />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Senha"
-                        placeholderTextColor={currentColors.muted}
-                        secureTextEntry
-                        value={senha}
-                        onChangeText={setSenha}
-                    />
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={styles.passwordInput} // Estilo ajustado
+                            placeholder="Senha"
+                            placeholderTextColor={currentColors.muted}
+                            secureTextEntry={!showPassword} // Alterna visualização
+                            value={senha}
+                            onChangeText={setSenha}
+                        />
+                        <TouchableOpacity 
+                            style={styles.eyeIcon} 
+                            onPress={() => setShowPassword(!showPassword)}
+                        >
+                            <Ionicons 
+                                name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                                size={24} 
+                                color={currentColors.muted} 
+                            />
+                        </TouchableOpacity>
+                    </View>
 
                     <TouchableOpacity style={styles.button} onPress={handleLogin}>
                         <Text style={styles.buttonText}>Login</Text>
@@ -164,6 +179,29 @@ const getStyles = (currentColors: ThemeColors) => StyleSheet.create({
         borderColor: currentColors.border,
         color: currentColors.text,
         fontFamily: 'Atkinson-Regular', 
+    },
+    passwordContainer: {
+        width: '85%',
+        height: 55,
+        backgroundColor: currentColors.card,
+        borderRadius: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: currentColors.border,
+        marginBottom: 15,
+    },
+    passwordInput: {
+        flex: 1,
+        height: '100%',
+        paddingLeft: 20,
+        fontSize: 16,
+        color: currentColors.text,
+        fontFamily: 'Atkinson-Regular',
+    },
+    eyeIcon: {
+        padding: 10,
+        paddingRight: 15,
     },
     button: {
         width: '85%',
