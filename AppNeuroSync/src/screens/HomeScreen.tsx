@@ -60,10 +60,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     const currentColors = colors[theme];
     const styles = getStyles(currentColors, theme);
 
-    // --- Estados ---
+    // --- Estados para os modais ---
     const [modalFilterVisible, setModalFilterVisible] = useState(false);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
-    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null); // Sala selecionada para detalhes/reserva
 
     // --- Estados de data/hora ---
     const [reservationDate, setReservationDate] = useState(new Date());
@@ -104,6 +104,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         setDetailsModalVisible(true);
     };
 
+    // Função para confirmar reserva
     const handleConfirmReservation = async () => {
         setDetailsModalVisible(false);
 
@@ -153,6 +154,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
     );
 
+    // Renderização dos cards de salas
     const renderItem = ({ item }: { item: Room }) => {
         const ruidoInfo = getStatusColor(item.ruido, theme);
         const luzInfo = getStatusColor(item.luz, theme);

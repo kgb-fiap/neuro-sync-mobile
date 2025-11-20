@@ -1,5 +1,4 @@
 import React from "react";
-import { View, Text } from 'react-native';
 import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -106,9 +105,9 @@ const getToastConfig = (theme: 'light' | 'dark'): ToastConfig => {
       <BaseToast
         {...props}
         style={{ 
-            borderLeftColor: currentColors.secondary, // Verde Suave
+            borderLeftColor: currentColors.secondary,
             backgroundColor: currentColors.card,
-            height: 80, // Mais alto para caber texto grande
+            height: 80,
             width: '90%',
             borderRadius: 12,
         }}
@@ -120,7 +119,7 @@ const getToastConfig = (theme: 'light' | 'dark'): ToastConfig => {
         }}
         text2Style={{
           fontSize: 15,
-          fontFamily: 'Atkinson-Regular', // Leitura fácil
+          fontFamily: 'Atkinson-Regular',
           color: currentColors.muted
         }}
       />
@@ -129,7 +128,7 @@ const getToastConfig = (theme: 'light' | 'dark'): ToastConfig => {
       <ErrorToast
         {...props}
         style={{ 
-            borderLeftColor: '#D98880', // Vermelho Suave (Coral) - Não agressivo
+            borderLeftColor: '#D98880',
             backgroundColor: currentColors.card,
             height: 80,
             width: '90%',
@@ -213,9 +212,9 @@ const AppContent = () => {
 
       <Toast 
         config={getToastConfig(theme)} 
-        visibilityTime={4000} // 4 Segundos (Tempo para TDAH/Dislexia lerem)
+        visibilityTime={4000}
         position="top"
-        topOffset={60} // Abaixo da StatusBar
+        topOffset={60}
       />
     </NavigationContainer>
   );

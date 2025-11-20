@@ -51,15 +51,15 @@ const ReservationsScreen = () => {
     const [isFiltering, setIsFiltering] = useState(false);
     const styles = getStyles(currentColors, theme, isFiltering);
 
-    // --- Estado ---
+    // --- Estado para as reservas ---
     const { reservations, cancelReservation, updateReservation } = useUser();
 
-    // --- ESTADOS DE FILTRO ---
+    // --- Estados de filtros ---
     const [filteredReservations, setFilteredReservations] = useState<Reservation[] | null>(null);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [filterDate, setFilterDate] = useState<Date>(new Date());
 
-    // --- ESTADOS DE EDIÇÃO ---
+    // --- Estados para os modais --- ---
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
 
@@ -74,7 +74,6 @@ const ReservationsScreen = () => {
     // Dados a serem exibidos (Filtrados ou Todos)
     const displayData = filteredReservations || reservations;
 
-    // --- DATE PICKER LÓGICA ---
     const showDatePicker = (mode: 'date' | 'time', context: 'filter' | 'edit') => {
         setPickerMode(mode);
         setPickerContext(context);
@@ -99,7 +98,7 @@ const ReservationsScreen = () => {
         }
     };
 
-    // --- LÓGICA DE CANCELAMENTO ---
+    // Função para cancelar reserva
     const handleCancelReservation = (id: string) => {
         Alert.alert(
             "Cancelar Reserva?", // Título claro
@@ -133,7 +132,7 @@ const ReservationsScreen = () => {
         );
     };
 
-    // --- LÓGICA DE EDIÇÃO ---
+    // Função para abrir modal de edição
     const handleOpenEdit = (reservation: Reservation) => {
         setEditingReservation(reservation);
         // Tenta converter a string de data de volta para objeto Date (simplificado)
@@ -143,7 +142,7 @@ const ReservationsScreen = () => {
         setEditModalVisible(true);
     };
 
-    // --- LÓGICA DE EDIÇÃO (SALVAR ASYNC) ---
+    // Função para salvar edição
     const handleSaveEdit = async () => {
         if (!editingReservation) return;
 
@@ -181,7 +180,7 @@ const ReservationsScreen = () => {
         }
     };
 
-    // --- LÓGICA DE FILTRO ---
+    // Aplicar filtro
     const applyFilter = () => {
         // Filtro exato pela string de data (simplificado)
         // O ideal seria comparar timestamps, mas vamos comparar a string formatada
@@ -200,7 +199,6 @@ const ReservationsScreen = () => {
         setFilterModalVisible(false);
     };
 
-    // --- RENDER ITEM ---
     const renderItem = ({ item }: { item: Reservation }) => {
         const statusStyle = getStatusStyle(item.status, currentColors);
         const isActive = item.status === 'active';

@@ -41,7 +41,7 @@ const MyProfileScreen = () => {
     // --- Contexto do usuário ---
     const { user, logout } = useUser();
 
-    // Estado para notificações
+    // --- Estado para notificações ---
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
     const toggleNotifications = () => setNotificationsEnabled(prev => !prev);
 

@@ -53,14 +53,16 @@ const HelpScreen: React.FC<Props> = ({ navigation }) => {
     const currentColors = colors[theme];
     const styles = getStyles(currentColors, theme);
 
-    // Estado para controlar qual FAQ está aberto
+    // --- Estado para controlar qual FAQ está aberto ---
     const [expandedId, setExpandedId] = useState<number | null>(null);
 
+    // Função para criar um efeito de acordeão suave ao abrir/fechar perguntas
     const toggleExpand = (id: number) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setExpandedId(expandedId === id ? null : id);
     };
 
+    // Função para abrir o app de email ou telefone do celular
     const handleContactSupport = (type: 'email' | 'phone') => {
         if (type === 'email') {
             Linking.openURL('mailto:suporte@neurosync.com');

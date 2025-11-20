@@ -52,6 +52,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
     // --- Contexto de Usuário ---
     const { register } = useUser();
 
+    // Validação para os inputs de cadastro
     const handleRegister = async () => {
         if (!nome || !email || !senha || !confirmeSenha) {
             Toast.show({

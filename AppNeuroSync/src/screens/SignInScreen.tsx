@@ -26,13 +26,16 @@ interface Props {
 }
 
 const SignInScreen: React.FC<Props> = ({ navigation }) => {
-    const [email, setEmail] = useState('');
-    const [senha, setSenha] = useState('');
 
     const { theme, toggleTheme } = useTheme();
     const currentColors = colors[theme];
     const styles = getStyles(currentColors);
 
+    // --- Estados dos inputs ---
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+
+    // Validação de login
     const handleLogin = () => {
         if (email === '' || senha === '') {
             Alert.alert('Campos vazios', 'Por favor, preencha o email e a senha.');
@@ -42,6 +45,7 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate('MainTabs'); 
     };
 
+    // Navegar para tela de Cadastro
     const handleNavigateToRegister = () => {
         navigation.navigate('SignUp');
     };
@@ -101,7 +105,7 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
                         style={styles.linkButton}
                         onPress={handleNavigateToRegister}
                     >
-                        <Text style={styles.linkText}>Não tem uma conta? Cadastre-se aqui</Text>
+                        <Text style={styles.linkTextSingUp}>Não tem uma conta? Cadastre-se aqui</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -179,6 +183,12 @@ const getStyles = (currentColors: ThemeColors) => StyleSheet.create({
         color: currentColors.primary,
         fontSize: 14,
         fontFamily: 'Inter-Regular', 
+    },
+    linkTextSingUp: {
+        color: currentColors.primary,
+        fontSize: 14,
+        fontFamily: 'Inter-Regular',
+        paddingBottom: 50, 
     },
 });
 
