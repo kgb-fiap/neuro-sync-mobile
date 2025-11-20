@@ -2,15 +2,21 @@
 
 **Inovando o Futuro do Trabalho através da Inclusão Sensorial**
 
+---
+
 ## **📖 Sobre o Projeto**
 
 **Neuro-Sync** é uma solução mobile desenvolvida para o desafio **Global Solution 2025 \- O Futuro do Trabalho**.
 
 O projeto aborda a inclusão produtiva de profissionais neurodivergentes (TDAH, TEA, Dislexia, etc.) em ambientes de trabalho híbridos e open-plan. A aplicação permite que colaboradores localizem e reservem "Espaços de Foco" baseados em suas necessidades sensoriais (níveis de ruído e iluminação), promovendo bem-estar, saúde mental e produtividade.
 
+---
+
 ### **🎯 Objetivo (ODS 8 e 10\)**
 
 Criar ambientes de trabalho adaptáveis que respeitem a diversidade neurológica, garantindo que a tecnologia atue como uma ferramenta de equidade, não de barreira.
+
+---
 
 ## **✨ Funcionalidades Principais**
 
@@ -24,10 +30,14 @@ Criar ambientes de trabalho adaptáveis que respeitem a diversidade neurológica
    * **Temas:** Suporte completo a **Modo Claro** e **Modo Escuro**.  
    * **Feedback Suave:** Uso de Toasts para feedback não-intrusivo e Alertas Modais apenas para ações críticas.
 
+---
+
 ### **🔗 Integrações (Simuladas neste MVP)**
 
 * **IoT:** Simulação de sensores de decibéis e luminosidade para atualizar o status das salas.  
 * **Backend:** Estrutura preparada para consumo de API REST para autenticação e persistência de reservas.
+
+---
 
 ## **🛠️ Tecnologias Utilizadas**
 
@@ -45,15 +55,18 @@ Criar ambientes de trabalho adaptáveis que respeitem a diversidade neurológica
   * expo-font (Carregamento de fontes customizadas)  
   * @expo/vector-icons (Ionicons)
 
+---
+
 ## **📂 Estrutura do Projeto**
 
+```
 Neuro-Sync/  
 ├── src/  
-│   ├── assets/              \# Imagens e fontes
-│   ├── context/             \# Contextos da aplicação  
+│   ├── assets/              # Imagens e fontes
+│   ├── context/             # Contextos da aplicação  
 │   │   ├── ThemeContext.tsx
 │   │   └── UserContext.tsx
-│   ├── screens/             \# Telas da Aplicação  
+│   ├── screens/             # Telas da Aplicação  
 │   │   ├── SplashScreen.tsx
 │   │   ├── SignInScreen.tsx
 │   │   ├── SignUpScreen.tsx
@@ -62,11 +75,14 @@ Neuro-Sync/
 │   │   ├── MyProfile.tsx 
 │   │   ├── HelpScreen.tsx
 │   │   └── AccessibilityScreen.tsx 
-│   ├── services/            \# Serviços e APIs
+│   ├── services/            # Serviços e APIs
 │   │   └── storage.ts
-│   └── theme/               \# Temas da aplicação
+│   └── theme/               # Temas da aplicação
 │       └── colors.ts
-└── App.tsx                  \# Entrada principal (Navegação e Providers)
+└── App.tsx                  # Entrada principal (Navegação e Providers)
+```
+
+---
 
 ## **🚀 Como Rodar o Projeto**
 
@@ -78,22 +94,32 @@ Neuro-Sync/
 
 ### **Passo a Passo**
 
-1. **Clone o repositório:**  
-   git clone \[https://github.com/kgb-fiap/neuro-sync-mobile.git\](https://github.com/kgb-fiap/neuro-sync-mobile.git)  
+1. **Clone o repositório:**
+```
+   git clone https://github.com/kgb-fiap/neuro-sync-mobile.git
    cd neuro-sync-mobile
+```
 
-2. **Instale as dependências:**  
+2. **Instale as dependências:**
+```
    npm install  
    \# ou  
    yarn install
+```
 
-3. **Execute o projeto:**  
+3. **Execute o projeto:**
+```
    npx expo start
+```
 
-4. **Abra no dispositivo:**  
+4. **Abra no dispositivo:**
+```  
    * Escaneie o QR Code com o app Expo Go (Android/iOS).  
    * Ou pressione a para abrir no emulador Android.  
    * Ou pressione i para abrir no simulador iOS.
+```
+
+---
 
 ## **🧪 Como Testar (Fluxo de Uso)**
 
@@ -111,14 +137,20 @@ Neuro-Sync/
    * Alterne entre **Tema Claro/Escuro** (ícone de lua/sol).  
    * Explore a tela de **Acessibilidade**.
 
-<!-- ## 🧭 Navegação das Telas
+<!-- ---
+
+ ## 🧭 Navegação das Telas
 
 Para visualizar o fluxo de navegação e a hierarquia das telas do aplicativo, consulte o nosso diagrama de navegação detalhado. [Clique aqui para ver o fluxo de navegação](link do vídeo no youtube). -->
+
+---
 
 ## **👥 Equipe**
 
 * [@gabrielCZz](https://github.com/orgs/kgb-fiap/people/gabrielCZz) - Gabriel Cruz | RM 559613
 * [@k-auaferreira](https://github.com/orgs/kgb-fiap/people/k-auaferreira) - Kauã Ferreira | RM 560992
 * [@Vi-debu](https://github.com/orgs/kgb-fiap/people/Vi-debu) - Vinicius Bitú | RM 560227
+
+---
 
 **Neuro-Sync © 2025 \- Global Solution FIAP**
