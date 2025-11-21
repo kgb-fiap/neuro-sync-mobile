@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  smart-desk-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-desk-mobile
+    ports:
+      - "3000:80" # Acessível na porta 3000 da VM
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.smart-desk.description=Smart Desk Mobile Web Application"
+      - "com.smart-desk.version=1.0.0"
+    networks:
+      - smart-desk-network
+
+networks:
+  smart-desk-network:
+    driver: bridge

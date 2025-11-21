@@ -1,0 +1,47 @@
+# Dependências
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Docker
+Dockerfile
+docker-compose.yaml
+.dockerignore
+
+# Git
+.git
+.gitignore
+
+# Documentação e Configuração de IDE
+README.md
+LICENSE
+.vscode
+.idea
+*.iml
+
+# Arquivos de ambiente
+.env.local
+.env.development
+.env.production
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+
+# Mobile
+android
+ios
+
+# Testes e Cobertura
+coverage
+*.test.js
+*.spec.js
+tests
+
+# Builds anteriores
+web-build
+dist
+.expo
+.expo-shared
