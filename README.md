@@ -41,19 +41,15 @@ Criar ambientes de trabalho adaptáveis que respeitem a diversidade neurológica
 
 ## **🛠️ Tecnologias Utilizadas**
 
-* **React Native (Expo):** Framework principal.  
-* **TypeScript:** Para tipagem estática e segurança do código.  
-* **React Navigation:**  
-  * Stack Navigator: Fluxo de Autenticação e Telas Auxiliares.  
-  * Bottom Tab Navigator: Navegação principal do App.  
-* **AsyncStorage:** Persistência local de dados (Usuário, Tema, Reservas).  
-* **Context API:** Gerenciamento global de estado (UserContext, ThemeContext).  
-* **Bibliotecas de UI/UX:**  
-  * react-native-safe-area-context  
-  * react-native-keyboard-aware-scroll-view  
-  * react-native-toast-message  
-  * expo-font (Carregamento de fontes customizadas)  
-  * @expo/vector-icons (Ionicons)
+* **Mobile**: React Native (Expo), TypeScript.
+* **Navegação**: React Navigation (Stack & Bottom Tabs).
+* **Persistência**: AsyncStorage, Context API.
+* **UI/UX**: Safe Area Context, Keyboard Aware ScrollView, Toast Message, Expo Font, Ionicons.
+* **DevOps & Infraestrutura**:
+   * Docker: Containerização da aplicação.
+   * Docker Compose: Orquestração de containers.
+   * Nginx: Servidor web de alta performance para servir o build web.
+   * Azure VM: Ambiente de hospedagem Linux.
 
 ---
 
@@ -79,7 +75,12 @@ Neuro-Sync/
 │   │   └── storage.ts
 │   └── theme/               # Temas da aplicação
 │       └── colors.ts
-└── App.tsx                  # Entrada principal (Navegação e Providers)
+├── Dockerfile               # Configuração de build da imagem
+├── docker-compose.yaml      # Orquestração dos serviços
+├── nginx.conf               # Configuração do servidor web
+├── App.tsx                  # Entrada Principal
+├── package.json
+└── tsconfig.json
 ```
 
 ---
