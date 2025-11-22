@@ -98,7 +98,7 @@ Neuro-Sync/
 1. **Clone o repositório:**
 ```
    git clone https://github.com/kgb-fiap/neuro-sync-mobile.git
-   cd neuro-sync-mobile
+   cd AppNeuroSync
 ```
 
 2. **Instale as dependências:**
